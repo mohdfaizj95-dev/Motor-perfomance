@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Motor Performance Analyzer</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.header {
+    background: #111827;
+    color: white;
+    padding: 22px 15px;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.header p {
+    margin: 7px 0 0;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+}
+
+.card h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 12px;
+    font-size: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+}
+
+.unit {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 17px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-green {
+    background: #059669;
+    color: white;
+}
+
+.btn-orange {
+    background: #ea580c;
+    color: white;
+}
+
+.btn-gray {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-red {
+    background: #dc2626;
+    color: white;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+th {
+    background: #111827;
+    color: white;
+    padding: 10px;
+    font-size: 13px;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 13px;
+}
+
+td input {
+    padding: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 17px;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.result-value {
+    font-size: 23px;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.result-unit {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 3px;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+}
+
+.info {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.warning {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.success {
+    display: none;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.footer {
+    text-align: center;
+    color: #64748b;
+    font-size: 12px;
+    padding: 20px;
+}
+
+@media(max-width:900px) {
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:600px) {
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="header">
+
+    <h1>Motor Performance Analyzer</h1>
+
+    <p>
+        DC Brush Motor Engineering Toolbox
+    </p>
+
+</div>
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     MOTOR PARAMETERS
+====================================================== -->
+
+<div class="card">
+
+    <h2>1. Motor Test Parameters</h2>
+
+    <div class="grid">
+
+        <div class="input-group">
+
+            <label>Motor Voltage</label>
+
+            <input
+                type="number"
+                id="voltage"
+                value="12"
+                step="0.01"
+            >
+
+            <div class="unit">
+                Volt (V)
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>Motor Efficiency Factor</label>
+
+            <input
+                type="number"
+                id="motorFactor"
+                value="100"
+                step="0.1"
+            >
+
+            <div class="unit">
+                % correction factor
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>Gear Ratio</label>
+
+            <input
+                type="number"
+                id="gearRatio"
+                value="1"
+                step="0.01"
+            >
+
+            <div class="unit">
+                Motor : Output
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>Gear Efficiency</label>
+
+            <input
+                type="number"
+                id="gearEfficiency"
+                value="100"
+                step="0.1"
+            >
+
+            <div class="unit">
+                %
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="buttons">
+
+        <button
+            class="btn-green"
+            onclick="loadMP33Data()"
+        >
+            Load MP33 Example
+        </button>
+
+        <button
+            class="btn-gray"
+            onclick="clearData()"
+        >
+            Clear All Data
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TEST DATA
+====================================================== -->
+
+<div class="card">
+
+    <h2>2. Motor Test Data</h2>
+
+    <div class="info">
+
+        Enter your actual motor test measurements.
+
+        <br><br>
+
+        <strong>
+            Torque
+        </strong>
+        = mN·m
+
+        &nbsp;&nbsp;
+
+        <strong>
+            RPM
+        </strong>
+        = motor speed
+
+        &nbsp;&nbsp;
+
+        <strong>
+            Current
+        </strong>
+        = A
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>No.</th>
+
+                    <th>
+                        Torque
+                        <br>
+                        mN·m
+                    </th>
+
+                    <th>
+                        RPM
+                    </th>
+
+                    <th>
+                        Current
+                        <br>
+                        A
+                    </th>
+
+                    <th>
+                        Input Power
+                        <br>
+                        W
+                    </th>
+
+                    <th>
+                        Output Power
+                        <br>
+                        W
+                    </th>
+
+                    <th>
+                        Efficiency
+                        <br>
+                        %
+                    </th>
+
+                    <th>
+                        Output RPM
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="dataBody">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="buttons">
+
+        <button
+            class="btn-primary"
+            onclick="addRow()"
+        >
+            + Add Test Point
+        </button>
+
+
+        <button
+            class="btn-orange"
+            onclick="calculateAll()"
+        >
+            Calculate
+        </button>
+
+
+        <button
+            class="btn-green"
+            onclick="exportCSV()"
+        >
+            Export CSV
+        </button>
+
+
+        <button
+            class="btn-gray"
+            onclick="document.getElementById('csvFile').click()"
+        >
+            Import CSV
+        </button>
+
+        <input
+            type="file"
+            id="csvFile"
+            accept=".csv"
+            style="display:none"
+            onchange="importCSV(event)"
+        >
+
+    </div>
+
+
+    <div
+        id="warning"
+        class="warning"
+    ></div>
+
+
+    <div
+        id="success"
+        class="success"
+    ></div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SUMMARY
+====================================================== -->
+
+<div class="card">
+
+    <h2>3. Performance Summary</h2>
+
+
+    <div class="result-grid">
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Maximum RPM
+            </div>
+
+            <div
+                class="result-value"
+                id="maxRPM"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                RPM
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Maximum Torque
+            </div>
+
+            <div
+                class="result-value"
+                id="maxTorque"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                mN·m
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Maximum Current
+            </div>
+
+            <div
+                class="result-value"
+                id="maxCurrent"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                A
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Maximum Efficiency
+            </div>
+
+            <div
+                class="result-value"
+                id="maxEfficiency"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                %
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Maximum Output Power
+            </div>
+
+            <div
+                class="result-value"
+                id="maxPower"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                W
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Average Efficiency
+            </div>
+
+            <div
+                class="result-value"
+                id="avgEfficiency"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                %
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Stall Torque
+            </div>
+
+            <div
+                class="result-value"
+                id="stallTorque"
+            >
+                -
+            </div>
+
+            <div class="result-unit">
+                mN·m
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+            <div class="result-title">
+                Test Points
+            </div>
+
+            <div
+                class="result-value"
+                id="testPoints"
+            >
+                0
+            </div>
+
+            <div class="result-unit">
+                points
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     CHARTS
+====================================================== -->
+
+<div class="card">
+
+    <h2>4. Motor Performance Curves</h2>
+
+
+    <div class="chart-grid">
+
+
+        <div>
+
+            <h3>
+                RPM vs Torque
+            </h3>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="rpmChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <h3>
+                Current vs Torque
+            </h3>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="currentChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <h3>
+                Efficiency vs Torque
+            </h3>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="efficiencyChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <h3>
+                Output Power vs Torque
+            </h3>
+
+            <div class="chart-container">
+
+                <canvas
+                    id="powerChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     FORMULAS
+====================================================== -->
+
+<div class="card">
+
+    <h2>5. Engineering Calculations</h2>
+
+    <div class="info">
+
+        <strong>Input Power</strong>
+
+        <br>
+
+        P<sub>in</sub> = Voltage × Current
+
+        <br><br>
+
+
+        <strong>Angular Speed</strong>
+
+        <br>
+
+        ω = RPM × 2π ÷ 60
+
+        <br><br>
+
+
+        <strong>Output Power</strong>
+
+        <br>
+
+        P<sub>out</sub> = Torque × Angular Speed
+
+        <br><br>
+
+
+        <strong>Efficiency</strong>
+
+        <br>
+
+        Efficiency = P<sub>out</sub> ÷ P<sub>in</sub> × 100
+
+        <br><br>
+
+
+        <strong>Gear Output RPM</strong>
+
+        <br>
+
+        Output RPM = Motor RPM ÷ Gear Ratio
+
+        <br><br>
+
+
+        <strong>Torque conversion</strong>
+
+        <br>
+
+        1 mN·m = 0.001 N·m
+
+    </div>
+
+</div>
+
+
+
+</div>
+
+
+<div class="footer">
+
+    Motor Performance Analyzer
+    |
+    GitHub Pages
+    |
+    DC Brush Motor Engineering
+
+</div>
+
+
+
+<script>
+
+/* =====================================================
+   GLOBAL VARIABLES
+====================================================== */
+
+let rpmChart = null;
+let currentChart = null;
+let efficiencyChart = null;
+let powerChart = null;
+
+
+/* =====================================================
+   ADD TEST ROW
+====================================================== */
+
+function addRow(
+    torque = "",
+    rpm = "",
+    current = ""
+) {
+
+    const tbody =
+        document.getElementById("dataBody");
+
+    const row =
+        document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td class="row-number">
+            ${tbody.children.length + 1}
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="torque"
+                value="${torque}"
+                step="0.01"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="rpm"
+                value="${rpm}"
+                step="1"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="current"
+                value="${current}"
+                step="0.001"
+            >
+        </td>
+
+        <td class="input-power">
+            -
+        </td>
+
+        <td class="output-power">
+            -
+        </td>
+
+        <td class="efficiency">
+            -
+        </td>
+
+        <td class="output-rpm">
+            -
+        </td>
+
+        <td>
+
+            <button
+                class="btn-red"
+                onclick="deleteRow(this)"
+            >
+                Delete
+            </button>
+
+        </td>
+
+    `;
+
+    tbody.appendChild(row);
+
+    updateRowNumbers();
+}
+
+
+/* =====================================================
+   DELETE ROW
+====================================================== */
+
+function deleteRow(button) {
+
+    button
+        .closest("tr")
+        .remove();
+
+    updateRowNumbers();
+
+    calculateAll();
+}
+
+
+/* =====================================================
+   UPDATE ROW NUMBERS
+====================================================== */
+
+function updateRowNumbers() {
+
+    const rows =
+        document.querySelectorAll("#dataBody tr");
+
+    rows.forEach((row, index) => {
+
+        row.querySelector(".row-number")
+            .textContent = index + 1;
+
+    });
+}
+
+
+/* =====================================================
+   CALCULATE ALL DATA
+====================================================== */
+
+function calculateAll() {
+
+    const voltage =
+        parseFloat(
+            document.getElementById("voltage").value
+        ) || 0;
+
+
+    const gearRatio =
+        parseFloat(
+            document.getElementById("gearRatio").value
+        ) || 1;
+
+
+    const gearEfficiency =
+        parseFloat(
+            document.getElementById("gearEfficiency").value
+        ) || 100;
+
+
+    const rows =
+        document.querySelectorAll("#dataBody tr");
+
+
+    let data = [];
+
+
+    let maxRPM = 0;
+    let maxTorque = 0;
+    let maxCurrent = 0;
+    let maxEfficiency = 0;
+    let maxPower = 0;
+
+    let efficiencySum = 0;
+    let efficiencyCount = 0;
+
+
+    rows.forEach(row => {
+
+        const torque =
+            parseFloat(
+                row.querySelector(".torque").value
+            );
+
+
+        const rpm =
+            parseFloat(
+                row.querySelector(".rpm").value
+            );
+
+
+        const current =
+            parseFloat(
+                row.querySelector(".current").value
+            );
+
+
+        if (
+            isNaN(torque) ||
+            isNaN(rpm) ||
+            isNaN(current)
+        ) {
+
+            row.querySelector(".input-power")
+                .textContent = "-";
+
+            row.querySelector(".output-power")
+                .textContent = "-";
+
+            row.querySelector(".efficiency")
+                .textContent = "-";
+
+            row.querySelector(".output-rpm")
+                .textContent = "-";
+
+            return;
+
+        }
+
+
+        /*
+            Input power
+        */
+
+        const inputPower =
+            voltage * current;
+
+
+        /*
+            Angular speed
+        */
+
+        const angularSpeed =
+            rpm * 2 * Math.PI / 60;
+
+
+        /*
+            Torque conversion
+        */
+
+        const torqueNm =
+            torque / 1000;
+
+
+        /*
+            Output power
+        */
+
+        const outputPower =
+            torqueNm * angularSpeed;
+
+
+        /*
+            Efficiency
+        */
+
+        let efficiency = 0;
+
+        if (inputPower > 0) {
+
+            efficiency =
+                outputPower /
+                inputPower *
+                100;
+
+        }
+
+
+        /*
+            Gear output RPM
+        */
+
+        const outputRPM =
+            rpm / gearRatio;
+
+
+        /*
+            Gear output torque
+        */
+
+        const gearOutputTorque =
+            torque *
+            gearRatio *
+            (gearEfficiency / 100);
+
+
+        /*
+            Display
+        */
+
+        row.querySelector(".input-power")
+            .textContent =
+            inputPower.toFixed(3);
+
+
+        row.querySelector(".output-power")
+            .textContent =
+            outputPower.toFixed(3);
+
+
+        row.querySelector(".efficiency")
+            .textContent =
+            efficiency.toFixed(2);
+
+
+        row.querySelector(".output-rpm")
+            .textContent =
+            outputRPM.toFixed(0);
+
+
+        /*
+            Summary
+        */
+
+        if (rpm > maxRPM)
+            maxRPM = rpm;
+
+
+        if (torque > maxTorque)
+            maxTorque = torque;
+
+
+        if (current > maxCurrent)
+            maxCurrent = current;
+
+
+        if (efficiency > maxEfficiency)
+            maxEfficiency = efficiency;
+
+
+        if (outputPower > maxPower)
+            maxPower = outputPower;
+
+
+        efficiencySum += efficiency;
+
+        efficiencyCount++;
+
+
+        data.push({
+
+            torque,
+            rpm,
+            current,
+            inputPower,
+            outputPower,
+            efficiency,
+            outputRPM,
+            gearOutputTorque
+
+        });
+
+    });
+
+
+    /*
+        Update summary
+    */
+
+    document.getElementById("maxRPM")
+        .textContent =
+        maxRPM.toFixed(0);
+
+
+    document.getElementById("maxTorque")
+        .textContent =
+        maxTorque.toFixed(2);
+
+
+    document.getElementById("maxCurrent")
+        .textContent =
+        maxCurrent.toFixed(3);
+
+
+    document.getElementById("maxEfficiency")
+        .textContent =
+        maxEfficiency.toFixed(2);
+
+
+    document.getElementById("maxPower")
+        .textContent =
+        maxPower.toFixed(3);
+
+
+    const averageEfficiency =
+        efficiencyCount > 0
+        ? efficiencySum / efficiencyCount
+        : 0;
+
+
+    document.getElementById("avgEfficiency")
+        .textContent =
+        averageEfficiency.toFixed(2);
+
+
+    document.getElementById("testPoints")
+        .textContent =
+        data.length;
+
+
+    /*
+        Stall torque approximation
+
+        The highest measured torque point
+        is treated as the current maximum
+        test torque.
+    */
+
+    if (data.length > 0) {
+
+        const highestTorque =
+            Math.max(
+                ...data.map(x => x.torque)
+            );
+
+        document.getElementById("stallTorque")
+            .textContent =
+            highestTorque.toFixed(2);
+
+    } else {
+
+        document.getElementById("stallTorque")
+            .textContent = "-";
+
+    }
+
+
+    /*
+        Sort data by torque
+        before plotting
+    */
+
+    data.sort(
+        (a,b) => a.torque - b.torque
+    );
+
+
+    updateCharts(data);
+
+}
+
+
+/* =====================================================
+   UPDATE CHARTS
+====================================================== */
+
+function updateCharts(data) {
+
+    const torque =
+        data.map(x => x.torque);
+
+
+    const rpm =
+        data.map(x => x.rpm);
+
+
+    const current =
+        data.map(x => x.current);
+
+
+    const efficiency =
+        data.map(x => x.efficiency);
+
+
+    const power =
+        data.map(x => x.outputPower);
+
+
+    /*
+        Destroy old charts
+    */
+
+    if (rpmChart)
+        rpmChart.destroy();
+
+    if (currentChart)
+        currentChart.destroy();
+
+    if (efficiencyChart)
+        efficiencyChart.destroy();
+
+    if (powerChart)
+        powerChart.destroy();
+
+
+    /*
+        RPM Chart
+    */
+
+    rpmChart =
+        new Chart(
+            document.getElementById("rpmChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: torque,
+
+                    datasets: [{
+
+                        label:
+                            "Motor RPM",
+
+                        data: rpm,
+
+                        borderWidth: 3,
+
+                        tension: 0.25,
+
+                        fill: false,
+
+                        pointRadius: 5
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        x: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Torque (mN·m)"
+
+                            }
+
+                        },
+
+                        y: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "RPM"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+
+    /*
+        Current Chart
+    */
+
+    currentChart =
+        new Chart(
+            document.getElementById("currentChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: torque,
+
+                    datasets: [{
+
+                        label:
+                            "Current",
+
+                        data: current,
+
+                        borderWidth: 3,
+
+                        tension: 0.25,
+
+                        fill: false,
+
+                        pointRadius: 5
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        x: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Torque (mN·m)"
+
+                            }
+
+                        },
+
+                        y: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Current (A)"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+
+    /*
+        Efficiency Chart
+    */
+
+    efficiencyChart =
+        new Chart(
+            document.getElementById("efficiencyChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: torque,
+
+                    datasets: [{
+
+                        label:
+                            "Efficiency",
+
+                        data: efficiency,
+
+                        borderWidth: 3,
+
+                        tension: 0.25,
+
+                        fill: false,
+
+                        pointRadius: 5
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        x: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Torque (mN·m)"
+
+                            }
+
+                        },
+
+                        y: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Efficiency (%)"
+
+                            },
+
+                            beginAtZero: true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+
+    /*
+        Power Chart
+    */
+
+    powerChart =
+        new Chart(
+            document.getElementById("powerChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: torque,
+
+                    datasets: [{
+
+                        label:
+                            "Output Power",
+
+                        data: power,
+
+                        borderWidth: 3,
+
+                        tension: 0.25,
+
+                        fill: false,
+
+                        pointRadius: 5
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        x: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Torque (mN·m)"
+
+                            }
+
+                        },
+
+                        y: {
+
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Output Power (W)"
+
+                            },
+
+                            beginAtZero: true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   LOAD MP33 EXAMPLE
+====================================================== */
+
+function loadMP33Data() {
+
+    /*
+        Example values only.
+
+        Replace these values with your
+        actual measured MP33 data.
+    */
+
+    document.getElementById("voltage")
+        .value = "12";
+
+
+    document.getElementById("motorFactor")
+        .value = "100";
+
+
+    document.getElementById("gearRatio")
+        .value = "1";
+
+
+    document.getElementById("gearEfficiency")
+        .value = "100";
+
+
+    const tbody =
+        document.getElementById("dataBody");
+
+
+    tbody.innerHTML = "";
+
+
+    const exampleData = [
+
+        [0,     4710, 0.18],
+
+        [5,     4500, 0.22],
+
+        [10,    4250, 0.27],
+
+        [15,    3980, 0.32],
+
+        [20,    3700, 0.38],
+
+        [25,    3350, 0.45],
+
+        [30,    2950, 0.54],
+
+        [35,    2500, 0.66]
+
+    ];
+
+
+    exampleData.forEach(row => {
+
+        addRow(
+            row[0],
+            row[1],
+            row[2]
+        );
+
+    });
+
+
+    calculateAll();
+
+
+    showSuccess(
+        "MP33 example data loaded. Replace it with your actual measured data."
+    );
+
+}
+
+
+/* =====================================================
+   CLEAR DATA
+====================================================== */
+
+function clearData() {
+
+    const confirmClear =
+        confirm(
+            "Clear all motor test data?"
+        );
+
+
+    if (!confirmClear)
+        return;
+
+
+    document.getElementById("dataBody")
+        .innerHTML = "";
+
+
+    addRow();
+
+    calculateAll();
+
+
+    document.getElementById("maxRPM")
+        .textContent = "0";
+
+
+    document.getElementById("maxTorque")
+        .textContent = "0";
+
+
+    document.getElementById("maxCurrent")
+        .textContent = "0";
+
+
+    document.getElementById("maxEfficiency")
+        .textContent = "0";
+
+
+    document.getElementById("maxPower")
+        .textContent = "0";
+
+
+    document.getElementById("avgEfficiency")
+        .textContent = "0";
+
+
+    document.getElementById("stallTorque")
+        .textContent = "-";
+
+
+    document.getElementById("testPoints")
+        .textContent = "0";
+
+}
+
+
+/* =====================================================
+   EXPORT CSV
+====================================================== */
+
+function exportCSV() {
+
+    const voltage =
+        document.getElementById("voltage")
+            .value;
+
+
+    const gearRatio =
+        document.getElementById("gearRatio")
+            .value;
+
+
+    const rows =
+        document.querySelectorAll(
+            "#dataBody tr"
+        );
+
+
+    if (rows.length === 0) {
+
+        showWarning(
+            "There is no data to export."
+        );
+
+        return;
+
+    }
+
+
+    let csv =
+        "Motor Performance Data\n";
+
+
+    csv +=
+        "Voltage (V)," +
+        voltage +
+        "\n";
+
+
+    csv +=
+        "Gear Ratio," +
+        gearRatio +
+        "\n\n";
+
+
+    csv +=
+        "No,Torque (mN.m)," +
+        "RPM,Current (A)," +
+        "Input Power (W)," +
+        "Output Power (W)," +
+        "Efficiency (%)," +
+        "Output RPM\n";
+
+
+    rows.forEach(
+        (row, index) => {
+
+            const torque =
+                row.querySelector(
+                    ".torque"
+                ).value;
+
+
+            const rpm =
+                row.querySelector(
+                    ".rpm"
+                ).value;
+
+
+            const current =
+                row.querySelector(
+                    ".current"
+                ).value;
+
+
+            const inputPower =
+                row.querySelector(
+                    ".input-power"
+                ).textContent;
+
+
+            const outputPower =
+                row.querySelector(
+                    ".output-power"
+                ).textContent;
+
+
+            const efficiency =
+                row.querySelector(
+                    ".efficiency"
+                ).textContent;
+
+
+            const outputRPM =
+                row.querySelector(
+                    ".output-rpm"
+                ).textContent;
+
+
+            csv +=
+
+                `${index + 1},` +
+
+                `${torque},` +
+
+                `${rpm},` +
+
+                `${current},` +
+
+                `${inputPower},` +
+
+                `${outputPower},` +
+
+                `${efficiency},` +
+
+                `${outputRPM}\n`;
+
+        }
+    );
+
+
+    /*
+        Create download
+    */
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+
+    const date =
+        new Date()
+            .toISOString()
+            .slice(0,10);
+
+
+    link.download =
+        `motor_performance_${date}.csv`;
+
+
+    document.body.appendChild(link);
+
+
+    link.click();
+
+
+    document.body.removeChild(link);
+
+
+    URL.revokeObjectURL(url);
+
+
+    showSuccess(
+        "CSV file exported successfully."
+    );
+
+}
+
+
+/* =====================================================
+   IMPORT CSV
+====================================================== */
+
+function importCSV(event) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file)
+        return;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(e) {
+
+            const text =
+                e.target.result;
+
+
+            parseCSV(text);
+
+        };
+
+
+    reader.readAsText(file);
+
+}
+
+
+/* =====================================================
+   PARSE CSV
+====================================================== */
+
+function parseCSV(text) {
+
+    const lines =
+        text
+            .split(/\r?\n/)
+            .filter(
+                line => line.trim() !== ""
+            );
+
+
+    let headerIndex = -1;
+
+
+    /*
+        Find actual data header
+    */
+
+    for (
+        let i = 0;
+        i < lines.length;
+        i++
+    ) {
+
+        if (
+            lines[i]
+                .toLowerCase()
+                .includes("torque")
+        ) {
+
+            headerIndex = i;
+
+            break;
+
+        }
+
+    }
+
+
+    if (headerIndex === -1) {
+
+        showWarning(
+            "Could not find motor data in the CSV file."
+        );
+
+        return;
+
+    }
+
+
+    const tbody =
+        document.getElementById("dataBody");
+
+
+    tbody.innerHTML = "";
+
+
+    /*
+        Read data rows
+    */
+
+    for (
+        let i = headerIndex + 1;
+        i < lines.length;
+        i++
+    ) {
+
+        const parts =
+            lines[i]
+                .split(",");
+
+
+        if (parts.length < 4)
+            continue;
+
+
+        /*
+            Expected:
+
+            No
+            Torque
+            RPM
+            Current
+        */
+
+        const torque =
+            parseFloat(parts[1]);
+
+
+        const rpm =
+            parseFloat(parts[2]);
+
+
+        const current =
+            parseFloat(parts[3]);
+
+
+        if (
+            isNaN(torque) ||
+            isNaN(rpm) ||
+            isNaN(current)
+        ) {
+
+            continue;
+
+        }
+
+
+        addRow(
+            torque,
+            rpm,
+            current
+        );
+
+    }
+
+
+    calculateAll();
+
+
+    showSuccess(
+        "CSV data imported successfully."
+    );
+
+}
+
+
+/* =====================================================
+   MESSAGES
+====================================================== */
+
+function showWarning(message) {
+
+    const warning =
+        document.getElementById(
+            "warning"
+        );
+
+
+    warning.textContent =
+        message;
+
+
+    warning.style.display =
+        "block";
+
+
+    document.getElementById(
+        "success"
+    ).style.display =
+        "none";
+
+}
+
+
+function showSuccess(message) {
+
+    const success =
+        document.getElementById(
+            "success"
+        );
+
+
+    success.textContent =
+        message;
+
+
+    success.style.display =
+        "block";
+
+
+    document.getElementById(
+        "warning"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+====================================================== */
+
+window.addEventListener(
+    "load",
+    function() {
+
+        /*
+            Start with 5 empty rows
+        */
+
+        for (
+            let i = 0;
+            i < 5;
+            i++
+        ) {
+
+            addRow();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   AUTO CALCULATE WHEN INPUT CHANGES
+====================================================== */
+
+document.addEventListener(
+    "input",
+    function(event) {
+
+        if (
+            event.target.matches(
+                "input"
+            )
+        ) {
+
+            /*
+                Small delay prevents excessive
+                chart redraws while typing.
+            */
+
+            clearTimeout(
+                window.calculateTimer
+            );
+
+
+            window.calculateTimer =
+                setTimeout(
+                    calculateAll,
+                    300
+                );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
